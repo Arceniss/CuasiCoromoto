@@ -686,7 +686,7 @@
     <header class="encabezado">
         <div class="contenedor-central">
             <div class="logo">
-                <p class="titulo-secundario">CUASIPARROQUIAx</p>
+                <p class="titulo-secundario">CUASIPARROQUIAz</p>
                 <h1 class="titulo-principal">Nuestra Señora de Coromoto</h1>
             </div>
             <nav class="navegacion">
@@ -1179,37 +1179,72 @@
     </script>
 
     <script>
-        let deferredPrompt; // Variable para guardar el evento de instalación
+        // --- INICIO SCRIPT BOTÓN INSTALAR PWA ---
+        
+        /**
+         * Función para detectar si el usuario está en un dispositivo móvil.
+         * Combina varias técnicas para ser más robusto.
+         * @returns {boolean} - True si es un dispositivo móvil, de lo contrario false.
+         */
+        function esDispositivoMovil() {
+            // 1. El método más moderno y preferido (User-Agent Client Hints)
+            if (navigator.userAgentData && navigator.userAgentData.mobile) {
+                return true;
+            }
+            // 2. Un método muy fiable es comprobar si existen eventos táctiles
+            if ('ontouchstart' in window) {
+                return true;
+            }
+            // 3. Como respaldo, usamos una Media Query, alineada con tu CSS
+            if (window.matchMedia("(max-width: 767px)").matches) {
+                return true;
+            }
+            // 4. El método clásico (menos fiable pero buen respaldo) de revisar el User Agent
+            const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+            return mobileRegex.test(navigator.userAgent);
+        }
+
+        let deferredPrompt;
         const botonInstalar = document.getElementById('boton-instalar');
-    
+
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevenir que Chrome muestre el aviso por defecto
+            // Previene que el navegador muestre su propio mini-banner
             e.preventDefault();
-            // Guardar el evento para poder dispararlo después
+            
+            // Guarda el evento para poder llamarlo más tarde
             deferredPrompt = e;
-            // Mostrar nuestro botón personalizado
-            if (botonInstalar) {
+
+            // --- ¡AQUÍ ESTÁ LA LÓGICA CLAVE! ---
+            // Solo mostramos el botón si la función detecta que es un móvil
+            if (esDispositivoMovil() && botonInstalar) {
+                console.log("Dispositivo móvil detectado y PWA instalable. Mostrando botón.");
                 botonInstalar.style.display = 'block';
+            } else {
+                console.log("No es un dispositivo móvil, el botón de instalación permanecerá oculto.");
             }
         });
-    
+
         if (botonInstalar) {
             botonInstalar.addEventListener('click', (e) => {
-                // Ocultar nuestro botón, ya que solo se puede usar una vez
+                // Ocultamos el botón porque ya no se puede usar
                 botonInstalar.style.display = 'none';
-                // Mostrar el aviso de instalación del navegador
-                deferredPrompt.prompt();
-                // Esperar la respuesta del usuario
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('El usuario aceptó instalar la PWA');
-                    } else {
-                        console.log('El usuario rechazó instalar la PWA');
-                    }
-                    deferredPrompt = null;
-                });
+
+                // Si el evento de instalación está disponible, lo disparamos
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('El usuario aceptó instalar la PWA');
+                        } else {
+                            console.log('El usuario rechazó instalar la PWA');
+                        }
+                        // Limpiamos la variable, ya no se puede usar
+                        deferredPrompt = null;
+                    });
+                }
             });
         }
+        // --- FIN SCRIPT BOTÓN INSTALAR PWA ---
     </script>
 </body>
 
