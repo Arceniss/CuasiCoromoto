@@ -686,7 +686,7 @@
     <header class="encabezado">
         <div class="contenedor-central">
             <div class="logo">
-                <p class="titulo-secundario">CUASIPARROQUIAxx</p>
+                <p class="titulo-secundario">CUASIPARROQUIAx</p>
                 <h1 class="titulo-principal">Nuestra Señora de Coromoto</h1>
             </div>
             <nav class="navegacion">
@@ -712,6 +712,12 @@
     <main>
 
         <!-- ======================== 1. INICIO ======================== -->
+        <!-- Ponlo donde quieras, por ejemplo, antes del footer -->
+        <div class="contenedor-central" style="text-align: center; padding-bottom: 40px;">
+            <button id="boton-instalar" style="display: none; padding: 15px 25px; background-color: var(--color-dorado-vibrante); color: var(--color-vinotinto-profundo); border: none; border-radius: 8px; font-family: var(--fuente-cuerpo); font-size: 1.1rem; font-weight: bold; cursor: pointer;">
+                📥 Instalar Aplicación
+            </button>
+        </div>
         <section id="inicio" class="seccion">
             <div class="contenedor-central">
                 <h2 class="titulo-seccion">Bienvenidos</h2>
@@ -1169,6 +1175,40 @@
     <script>
         if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+
+    <script>
+        let deferredPrompt; // Variable para guardar el evento de instalación
+        const botonInstalar = document.getElementById('boton-instalar');
+    
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevenir que Chrome muestre el aviso por defecto
+            e.preventDefault();
+            // Guardar el evento para poder dispararlo después
+            deferredPrompt = e;
+            // Mostrar nuestro botón personalizado
+            if (botonInstalar) {
+                botonInstalar.style.display = 'block';
+            }
+        });
+    
+        if (botonInstalar) {
+            botonInstalar.addEventListener('click', (e) => {
+                // Ocultar nuestro botón, ya que solo se puede usar una vez
+                botonInstalar.style.display = 'none';
+                // Mostrar el aviso de instalación del navegador
+                deferredPrompt.prompt();
+                // Esperar la respuesta del usuario
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('El usuario aceptó instalar la PWA');
+                    } else {
+                        console.log('El usuario rechazó instalar la PWA');
+                    }
+                    deferredPrompt = null;
+                });
+            });
         }
     </script>
 </body>
